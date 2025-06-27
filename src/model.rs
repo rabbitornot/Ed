@@ -1,12 +1,25 @@
+use crate::command_line;
+use crate::command_line::CommandLine;
 use crate::edit::Buffer;
+use std::default::Default;
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct Model {
     pub buffer: Buffer,
     pub cursor: Cursor,
     pub mode: Mode,
     pub running_state: RunningState,
-    pub file_name: Option<String>,
+}
+
+impl Model {
+    pub fn new(path_to_file: Option<String>) -> Self {
+        Model {
+            buffer: Buffer::new(path_to_file),
+            cursor: Cursor::default(),
+            mode: Mode::default(),
+            running_state: RunningState::default(),
+        }
+    }
 }
 
 #[derive(Debug, Default, PartialEq, Eq)]
@@ -21,7 +34,7 @@ pub enum Mode {
     #[default]
     Normal,
     Insert,
-    Command,
+    Command(CommandLine),
 }
 
 #[derive(PartialEq)]

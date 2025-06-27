@@ -3,9 +3,16 @@ use crate::model::Cursor;
 #[derive(Debug, Default)]
 pub struct Buffer {
     content: Vec<String>,
+    pub(crate) path_to_file: Option<String>,
 }
 
 impl Buffer {
+    pub fn new(path_to_file: Option<String>) -> Self {
+        Buffer {
+            content: vec![String::new()],
+            path_to_file: path_to_file,
+        } //TODO: implement file reading
+    }
     pub fn add_char(&mut self, cursor: &mut Cursor, c: char) {
         self.ensure_not_empty();
 

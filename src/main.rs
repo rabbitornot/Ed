@@ -1,3 +1,4 @@
+mod command_line;
 mod edit;
 mod handle_event;
 mod model;
@@ -24,10 +25,7 @@ fn main() -> color_eyre::Result<()> {
     tui::install_panic_hook();
 
     let mut terminal = tui::init_terminal()?;
-    let mut model = Model {
-        file_name: args.file_name,
-        ..Default::default()
-    };
+    let mut model = Model::new(args.file_name);
 
     while model.running_state != RunningState::Done {
         terminal.draw(|f| view(&mut model, f))?;

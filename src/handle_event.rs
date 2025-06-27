@@ -1,3 +1,4 @@
+use crate::command_line::CommandLine;
 use crate::model::{Message, Mode, Model};
 use crossterm::event;
 use crossterm::event::{Event, KeyCode};
@@ -18,7 +19,17 @@ fn handle_key(model: &Model, key: event::KeyEvent) -> Option<Message> {
     match model.mode {
         Mode::Insert => handle_key_insert_mode(key),
         Mode::Normal => handle_key_normal_mode(key),
-        Mode::Command => None,
+        Mode::Command(_) => handle_key_command_mode(key),
+    }
+}
+
+fn handle_key_command_mode(key: event::KeyEvent) -> Option<Message> {
+    match key.code {
+        KeyCode::Char(c) => Some(Message::NewChar(c)),
+        KeyCode::Backspace => Some(Message::Delete),
+        KeyCode::Enter => Some(Message::NewLine),
+        KeyCode::Esc => Some(Message::ChangeMode(Mode::Normal)),
+        _ => None,
     }
 }
 
@@ -36,6 +47,9 @@ fn handle_key_normal_mode(key: event::KeyEvent) -> Option<Message> {
     match key.code {
         KeyCode::Char('q') => Some(Message::Quit),
         KeyCode::Char('i') => Some(Message::ChangeMode(Mode::Insert)),
+        KeyCode::Char(':') => Some(Message::ChangeMode(Mode::Command(CommandLine {
+            user_input: String::new(),
+        }))),
         _ => None,
     }
 }

@@ -6,9 +6,27 @@ use std::io::stdout;
 
 pub fn update(model: &mut Model, msg: Message) -> Option<Message> {
     match msg {
-        Message::NewChar(c) => model.buffer.add_char(&mut model.cursor, c),
-        Message::Delete => model.buffer.delete_char(&mut model.cursor),
-        Message::NewLine => model.buffer.new_line(&mut model.cursor),
+        Message::NewChar(c) => {
+            if let Mode::Command(command_line) = &mut model.mode {
+                command_line.add_char(c);
+                return None;
+            }
+            model.buffer.add_char(&mut model.cursor, c)
+        }
+        Message::Delete => {
+            if let Mode::Command(command_line) = &mut model.mode {
+                command_line.remove_char();
+                return None;
+            }
+            model.buffer.delete_char(&mut model.cursor)
+        }
+        Message::NewLine => {
+            if let Mode::Command(command_line) = &mut model.mode {
+                command_line.clear();
+                return Some(Message::ChangeMode(Mode::Normal));
+            }
+            model.buffer.new_line(&mut model.cursor)
+        }
 
         Message::Quit => {
             model.running_state = RunningState::Done;
@@ -25,6 +43,6 @@ fn mode_to_cursor_style(mode: &Mode) -> SetCursorStyle {
     match mode {
         Mode::Normal => SetCursorStyle::BlinkingBlock,
         Mode::Insert => SetCursorStyle::SteadyBlock,
-        Mode::Command => SetCursorStyle::SteadyBlock,
+        Mode::Command(_) => SetCursorStyle::SteadyBlock,
     }
 }
