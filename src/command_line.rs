@@ -1,4 +1,6 @@
-#[derive(Debug, PartialEq)]
+use crate::model::Message;
+
+#[derive(Debug, PartialEq, Clone)]
 pub struct CommandLine {
     pub user_input: String,
 }
@@ -12,7 +14,14 @@ impl CommandLine {
         self.user_input.pop();
     }
 
-    pub fn clear(&mut self) {
-        self.user_input.clear();
+    pub fn doit(&mut self) -> Option<Vec<Message>> {
+        match self.user_input.as_str() {
+            "w" => Some(vec![Message::SaveFile]),
+            "wq" => Some(vec![Message::SaveFile, Message::Quit]),
+            _ => {
+                self.user_input.clear();
+                None
+            }
+        }
     }
 }

@@ -22,8 +22,14 @@ pub fn update(model: &mut Model, msg: Message) -> Option<Message> {
         }
         Message::NewLine => {
             if let Mode::Command(command_line) = &mut model.mode {
-                command_line.clear();
-                return Some(Message::ChangeMode(Mode::Normal));
+                return Some(if let Some(command_line) = command_line.doit() {
+                    for command in command_line {
+                        update(model, command);
+                    }
+                    Message::ChangeMode(Mode::Normal)
+                } else {
+                    Message::Nope
+                });
             }
             model.buffer.new_line(&mut model.cursor)
         }
@@ -35,6 +41,11 @@ pub fn update(model: &mut Model, msg: Message) -> Option<Message> {
             stdout().execute(mode_to_cursor_style(&mode)).unwrap();
             model.mode = mode;
         }
+        Message::Nope => {
+            model.nope = 30;
+            return Some(Message::ChangeMode(Mode::Normal));
+        }
+        Message::SaveFile => {}
     }
     None
 }

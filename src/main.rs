@@ -28,10 +28,12 @@ fn main() -> color_eyre::Result<()> {
     let mut model = Model::new(args.file_name);
 
     while model.running_state != RunningState::Done {
+        if model.nope > 0 {
+            model.nope -= 1;
+        }
         terminal.draw(|f| view(&mut model, f))?;
 
         let mut current_msg = handle_event(&model)?;
-
         while let Some(msg) = current_msg {
             current_msg = update(&mut model, msg);
         }
